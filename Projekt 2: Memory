@@ -1,0 +1,51 @@
+import random
+import time
+
+
+def generate_sequence(difficulty):
+    """Genererar en sekvens av slumpmässiga bokstäver eller siffror baserat på svårighetsgrad."""
+    if difficulty == 'easy':
+        length = 4
+        characters = '1234567890'
+    elif difficulty == 'medium':
+        length = 6
+        characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
+    else:  # hard
+        length = 8
+        characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890'
+
+    return random.sample(characters, length)
+
+
+def shuffle_sequence(sequence):
+    """Blandar sekvensen slumpmässigt."""
+    shuffled = sequence[:]
+    random.shuffle(shuffled)
+    return shuffled
+
+
+def play_memory_game():
+    print("Välkommen till Memory-spelet!")
+    difficulty = input("Välj svårighetsgrad (easy, medium, hard): ").lower()
+
+    original_sequence = generate_sequence(difficulty)
+    print("Kom ihåg denna sekvens:")
+    print(" ".join(original_sequence))
+    time.sleep(3)  # Visar sekvensen i några sekunder
+    print("\n" * 50)  # "Rensar" skärmen genom att skriva många tomma rader
+
+    shuffled_sequence = shuffle_sequence(original_sequence)
+    print("Här är sekvensen blandad:")
+    print(" ".join(shuffled_sequence))
+
+    user_guess = input("Skriv in den ursprungliga sekvensen (separera med mellanslag): ").split()
+
+    if user_guess == original_sequence:
+        print("Grattis! Du gissade rätt.")
+    else:
+        print("Tyvärr, fel ordning. Försök igen!")
+        print("Den korrekta ordningen var:", " ".join(original_sequence))
+
+
+if __name__ == "__main__":
+    play_memory_game()
