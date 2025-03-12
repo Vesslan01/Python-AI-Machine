@@ -3,6 +3,7 @@ import pandas as pd
 import backtrader as bt
 import ta
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Hämta de senaste 1 månadens data från Yahoo Finance
 interval = "1h"  # Ändrat 4h till 1h för att Yahoo Finance ska fungera
@@ -15,7 +16,17 @@ data = yf.download("GC=F", start=start_date, end=end_date, interval=interval)
 print("Antal rader i datasetet:", len(data))
 print("Finns NaN?", data.isnull().values.any())
 print("Finns Inf?", np.isinf(data).values.any())
+print("Minsta värden i datasetet:\n", data.min())
+print("Största värden i datasetet:\n", data.max())
+print("Datatyper:\n", data.dtypes)
 print(data.head())  # Se de första raderna
+
+# Hantera volymkolumnen dynamiskt
+if 'Volume' in data.columns:
+    data['Volume'].replace(0, np.nan, inplace=True)
+else:
+    print("Volymkolumn saknas, skapar en dummy-kolumn.")
+    data['Volume'] = np.nan
 
 data.dropna(inplace=True)
 
@@ -37,6 +48,9 @@ if data.empty:
 
 print("Första raderna av renad data:")
 print(data.head())
+
+# Säkerställ att datetime-index är korrekt
+data.index = pd.to_datetime(data.index)
 
 
 # Skapa en Backtrader-strategi
@@ -82,7 +96,11 @@ cerebro.addstrategy(MACD_RSI_Strategy)
 if not data.isnull().values.any() and not np.isinf(data).values.any():
     cerebro.run()
     if len(data) >= 50:
-        cerebro.plot()
+        try:
+            fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(10, 5))
+            cerebro.plot()[0][0].set_ylim(data['close'].min() * 0.98, data['close'].max() * 1.02)
+        except ValueError as e:
+            print("Plotting misslyckades. Möjligt problem med NaN/Inf eller dataskala:", e)
     else:
         print("För lite data för att plotta grafen.")
 else:
